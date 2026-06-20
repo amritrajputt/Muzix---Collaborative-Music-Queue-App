@@ -7,7 +7,7 @@ import {
   pgEnum,
   boolean,
 } from "drizzle-orm/pg-core";
- 
+
 
 export const planTypeEnum = pgEnum("plan_type", ["free", "pro"])
 
@@ -73,9 +73,9 @@ export const spaceMembers = pgTable("space_members", {
     .notNull()
     .references(() => spaces.id, { onDelete: "cascade" }),
 
-  guestName: varchar("guest_name", { length: 255 }).notNull(),
-
   guestUuid: varchar("guest_uuid", { length: 255 }).notNull(),
+
+  guestName: varchar("guest_name", { length: 255 }).notNull(),
 
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
 })

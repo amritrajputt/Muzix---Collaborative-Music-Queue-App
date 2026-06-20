@@ -50,7 +50,7 @@ class SpaceController {
             next(err);
         }
     }
-    
+
     static async getSpaceDetails(req: Request, res: Response, next: NextFunction) {
         try {
             const { spaceId } = req.params;

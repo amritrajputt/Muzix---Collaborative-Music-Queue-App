@@ -1,24 +1,24 @@
 import db from "../../db/index.js"
 import ApiError from "../../common/errors/ApiError.js"
-import { users,plans,spaces,spaceMembers } from "../../db/schema.js"
+import { users, plans, spaces, spaceMembers } from "../../db/schema.js"
 import { eq, and } from "drizzle-orm"
 import bcrypt from "bcrypt";
 
-interface CreateSpace{
-    name:string,
-    password:string,
-    userId:string
+interface CreateSpace {
+    name: string,
+    password: string,
+    userId: string
 }
-interface JoinSpace{
-    spaceId:string,
-    guestName:string,
-    spacePassword:string,
-    guestUuid:string
+interface JoinSpace {
+    spaceId: string,
+    guestName: string,
+    spacePassword: string,
+    guestUuid: string
 }
 
-class SpaceService{
-    static async createSpace({name,password,userId}:CreateSpace){
-        const userPlan = await db.select().from(plans).where(eq(plans.userId,userId))
+class SpaceService {
+    static async createSpace({ name, password, userId }: CreateSpace) {
+        const userPlan = await db.select().from(plans).where(eq(plans.userId, userId))
         const planType = userPlan[0]?.planType ?? 'free';
         if (planType === 'free') {
             const existingSpaces = await db.select().from(spaces).where(eq(spaces.userId, userId))
@@ -26,16 +26,16 @@ class SpaceService{
                 throw ApiError.badRequest("Free plan users can only have 3 spaces");
             }
         }
-        const hashPassword=await bcrypt.hash(password,10);
+        const hashPassword = await bcrypt.hash(password, 10);
         const newSpace = await db.insert(spaces).values({
-            spaceName:name,
-            spacePassword:hashPassword,
+            spaceName: name,
+            spacePassword: hashPassword,
             userId
         }).returning();
         return newSpace[0];
     }
 
-    static async joinSpace({spaceId,guestName,spacePassword,guestUuid}:JoinSpace){ 
+    static async joinSpace({ spaceId, guestName, spacePassword, guestUuid }: JoinSpace) {
         const space = await db.select().from(spaces).where(eq(spaces.id, spaceId)).limit(1);
         if (space.length === 0) {
             throw ApiError.notFound("Space not found");
@@ -69,10 +69,10 @@ class SpaceService{
             guestName,
             guestUuid
         }).returning();
-        return newMember[0]; 
+        return newMember[0];
     }
 
-    static async getSpaceById(spaceId:string){
+    static async getSpaceById(spaceId: string) {
         const space = await db.select().from(spaces).where(eq(spaces.id, spaceId)).limit(1);
         if (space.length === 0) {
             throw ApiError.notFound("Space not found");
@@ -80,7 +80,7 @@ class SpaceService{
         return space[0];
     }
 
-    static async deleteSpace(spaceId:string){
+    static async deleteSpace(spaceId: string) {
         const space = await db.delete(spaces).where(eq(spaces.id, spaceId)).returning();
         if (space.length === 0) {
             throw ApiError.notFound("Space not found");
@@ -88,7 +88,7 @@ class SpaceService{
         return space[0];
     }
 
-    static async getSpacesByUserId(userId:string){
+    static async getSpacesByUserId(userId: string) {
         const space = await db.select().from(spaces).where(eq(spaces.userId, userId));
         if (space.length === 0) {
             throw ApiError.notFound("Space not found");
