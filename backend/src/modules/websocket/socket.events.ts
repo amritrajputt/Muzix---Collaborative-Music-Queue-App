@@ -6,16 +6,17 @@ import { NowPlayingService } from "../nowPlaying/nowPlaying.service.js"
 export const registerSocketEvents = (socket: Socket, io: Server) => {
   console.log("a user connected via socket:", socket.id)
 
-  socket.on("join-space", ({ spaceId, guestName }: JoinSpacePayload) => {
+  socket.on("join-space", ({ spaceId, guestName, guestUuid }: JoinSpacePayload) => {
     socket.join(spaceId)
     socket.data.spaceId = spaceId
     socket.data.guestName = guestName
-    emitToRoom("member-joined", { guestName }, spaceId)
+    socket.data.guestUuid = guestUuid
+    emitToRoom("member-joined", { guestName, guestUuid }, spaceId)
   })
 
-  socket.on("leave-space", ({ spaceId, guestName }: LeaveSpacePayload) => {
+  socket.on("leave-space", ({ spaceId, guestName, guestUuid }: LeaveSpacePayload) => {
     socket.leave(spaceId)
-    emitToRoom("member-left", { guestName }, spaceId)
+    emitToRoom("member-left", { guestName, guestUuid }, spaceId)
   })
 
   socket.on("report-duration", async ({ spaceId, songId, duration }: ReportDurationPayload) => {
@@ -27,9 +28,9 @@ export const registerSocketEvents = (socket: Socket, io: Server) => {
   })
 
   socket.on("disconnect", () => {
-    const { spaceId, guestName } = socket.data
+    const { spaceId, guestName, guestUuid } = socket.data
     if (spaceId) {
-      emitToRoom("member-left", { guestName }, spaceId)
+      emitToRoom("member-left", { guestName, guestUuid }, spaceId)
     }
     console.log("user disconnected:", socket.id)
   })

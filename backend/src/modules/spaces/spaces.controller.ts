@@ -32,17 +32,15 @@ class SpaceController {
     static async joinSpace(req: Request, res: Response, next: NextFunction) {
         try {
             const { spaceId, guestName, spacePassword } = req.body;
-            const guestUuid = req.guestUuid!;
 
             if (!spaceId || !guestName || !spacePassword) {
-                throw ApiError.badRequest("spaceId , guestName and spacePassword are required");
+                throw ApiError.badRequest("spaceId, guestName and spacePassword are required");
             }
 
             const space = await SpaceService.joinSpace({
                 spaceId,
                 guestName,
-                spacePassword,
-                guestUuid
+                spacePassword
             })
             const response = ApiResponse.created(201, { space }, "Space joined successfully")
             return res.status(response.statusCode).json(response)

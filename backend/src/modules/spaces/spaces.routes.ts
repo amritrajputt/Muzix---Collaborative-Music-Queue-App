@@ -6,7 +6,7 @@ const spaceRouter = Router()
 
 
 spaceRouter.post("/spaces", auth, SpaceController.createSpace);
-spaceRouter.post("/spaces/join", getGuestIdentifier, SpaceController.joinSpace);
+spaceRouter.post("/spaces/join", SpaceController.joinSpace);
 spaceRouter.get("/spaces/me", auth, SpaceController.getMySpaces);
 spaceRouter.get("/spaces/:spaceId", SpaceController.getSpaceDetails);
 spaceRouter.delete("/spaces/:spaceId", auth, SpaceController.deleteSpace);

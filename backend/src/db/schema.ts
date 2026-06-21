@@ -79,17 +79,3 @@ export const spaceMembers = pgTable("space_members", {
 
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
 })
-
-
-export const history = pgTable("history", {
-  id: uuid("id").primaryKey().defaultRandom(),
-
-  spaceId: uuid("space_id")
-    .notNull()
-    .references(() => spaces.id, { onDelete: "cascade" }),
-
-  title: varchar("title", { length: 255 }).notNull(),
-
-  url: varchar("url", { length: 500 }).notNull(),
-
-})

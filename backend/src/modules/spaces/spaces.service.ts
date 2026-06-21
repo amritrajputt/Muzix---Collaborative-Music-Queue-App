@@ -1,8 +1,9 @@
 import db from "../../db/index.js"
 import ApiError from "../../common/errors/ApiError.js"
-import { users, plans, spaces, spaceMembers } from "../../db/schema.js"
+import {  plans, spaces, spaceMembers } from "../../db/schema.js"
 import { eq, and } from "drizzle-orm"
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 interface CreateSpace {
     name: string,
@@ -12,8 +13,7 @@ interface CreateSpace {
 interface JoinSpace {
     spaceId: string,
     guestName: string,
-    spacePassword: string,
-    guestUuid: string
+    spacePassword: string
 }
 
 class SpaceService {
@@ -35,7 +35,7 @@ class SpaceService {
         return newSpace[0];
     }
 
-    static async joinSpace({ spaceId, guestName, spacePassword, guestUuid }: JoinSpace) {
+    static async joinSpace({ spaceId, guestName, spacePassword }: JoinSpace) {
         const space = await db.select().from(spaces).where(eq(spaces.id, spaceId)).limit(1);
         if (space.length === 0) {
             throw ApiError.notFound("Space not found");
@@ -48,21 +48,7 @@ class SpaceService {
             throw ApiError.badRequest("Invalid password");
         }
 
-        const existingMember = await db.select().from(spaceMembers)
-            .where(and(eq(spaceMembers.spaceId, spaceId), eq(spaceMembers.guestUuid, guestUuid)))
-            .limit(1);
-
-        if (existingMember.length > 0) {
-            // Update name if they changed it
-            if (existingMember[0].guestName !== guestName) {
-                const updated = await db.update(spaceMembers)
-                    .set({ guestName })
-                    .where(eq(spaceMembers.id, existingMember[0].id))
-                    .returning();
-                return updated[0];
-            }
-            return existingMember[0];
-        }
+        const guestUuid = crypto.randomUUID();
 
         const newMember = await db.insert(spaceMembers).values({
             spaceId,

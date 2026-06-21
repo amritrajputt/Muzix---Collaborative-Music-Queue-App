@@ -1,7 +1,5 @@
 import { RedisSortedSet } from "../redis/redis.sortedSet.js"
 import { emitToRoom } from "../websocket/socket.server.js"
-import db from "../../db/index.js"
-import { history } from "../../db/schema.js"
 import ApiError from "../../common/errors/ApiError.js"
 import { NowPlayingState } from "./nowPlaying.types.js"
 
@@ -30,12 +28,6 @@ export class NowPlayingService {
             }
 
             await RedisSortedSet.removeSongFromQueue(spaceId, songId)
-
-            await db.insert(history).values({
-                spaceId,
-                title: songMetadata.title,
-                url: songMetadata.url
-            })
 
             const nowPlayingInfo: NowPlayingState = {
                 songId,

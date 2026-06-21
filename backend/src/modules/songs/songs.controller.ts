@@ -6,12 +6,11 @@ import songService from "./songs.service.js"
 class songController {
     static async addSongController(req: Request, res: Response, next: NextFunction) {
         try {
-            const { spaceId, guestUuid, youtubeURL } = req.body
+            const { spaceId, youtubeURL } = req.body
+            const guestUuid = req.guestUuid!
+
             if (!youtubeURL) {
                 throw ApiError.badRequest("youtubeURL is required")
-            }
-            if (!guestUuid) {
-                throw ApiError.badRequest("guestUuid is required")
             }
             if (!spaceId) {
                 throw ApiError.badRequest("spaceId is required")

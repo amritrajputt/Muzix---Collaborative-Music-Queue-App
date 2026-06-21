@@ -12,9 +12,7 @@ Muzix is a real-time collaborative music room app where a host creates a private
 - 🗳️ **Real-time voting** — upvote or downvote songs, queue reorders live for everyone
 - 🚫 **Abuse protection** — queue size limits and per-user rate limiting prevent spam
 - 📡 **Live sync** across all connected users via WebSockets
-- 🕒 **Auto-expiring rooms** — free plan rooms close automatically after 2 hours
-- 📜 **Play history** — previously played songs can be added back to the queue
-- 💎 **Free & Pro plans** — limits on room count, duration, and queue size
+- 💎 **Free & Pro plans** — limits on room count and queue size
 
 ---
 

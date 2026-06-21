@@ -14,10 +14,12 @@ export interface LeaveSpacePayload {
 
 export interface MemberJoinedPayload {
   guestName: string
+  guestUuid: string
 }
 
 export interface MemberLeftPayload {
   guestName: string
+  guestUuid: string
 }
 
 export interface QueueUpdatedPayload {
