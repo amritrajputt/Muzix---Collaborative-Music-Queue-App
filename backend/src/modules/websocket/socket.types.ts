@@ -1,3 +1,5 @@
+import { ReportDurationPayload, NowPlayingChangedPayload } from "../nowPlaying/nowPlaying.types.js"
+
 export interface JoinSpacePayload {
   spaceId: string
   guestUuid: string
@@ -21,3 +23,5 @@ export interface MemberLeftPayload {
 export interface QueueUpdatedPayload {
   queue: any[]
 }
+
+export { ReportDurationPayload, NowPlayingChangedPayload }
