@@ -1,4 +1,4 @@
-import { createRootRoute, Outlet } from '@tanstack/react-router'
+import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { useState } from 'react'
 import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from '@clerk/clerk-react'
@@ -24,7 +24,6 @@ function Header() {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 md:px-12 py-3 bg-transparent">
-        {/* Logo */}
         <button
           onClick={() => scrollTo('home')}
           className="text-base md:text-lg font-black tracking-[0.12em] uppercase text-white border-0 bg-transparent cursor-pointer hover:opacity-70 transition-opacity p-0"
@@ -32,7 +31,6 @@ function Header() {
           MUZZIX
         </button>
 
-        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-8">
           {links.map(([label, id]) => (
             <button
@@ -45,7 +43,6 @@ function Header() {
           ))}
         </nav>
 
-        {/* Desktop CTA */}
         <div className="hidden md:block min-w-[80px]">
           {!isLoaded ? (
             <div className="flex justify-end pr-2">
@@ -63,13 +60,20 @@ function Header() {
                 </SignInButton>
               </SignedOut>
               <SignedIn>
-                <UserButton afterSignOutUrl="/" />
+                <div className="flex items-center gap-5">
+                  <Link
+                    to="/dashboard"
+                    className="text-sm font-semibold text-white/70 hover:text-white transition-colors cursor-pointer"
+                  >
+                    Dashboard
+                  </Link>
+                  <UserButton afterSignOutUrl="/" />
+                </div>
               </SignedIn>
             </>
           )}
         </div>
 
-        {/* Mobile hamburger */}
         <button
           className="md:hidden flex flex-col gap-[5px] p-1 border-0 bg-transparent cursor-pointer"
           onClick={() => setOpen(o => !o)}
@@ -81,7 +85,6 @@ function Header() {
         </button>
       </header>
 
-      {/* Mobile drawer */}
       <div
         className={`fixed inset-0 z-40 flex flex-col bg-black/95 backdrop-blur-xl transition-all duration-300 md:hidden ${
           open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
@@ -112,8 +115,17 @@ function Header() {
                 </SignInButton>
               </SignedOut>
               <SignedIn>
-                <div onClick={() => setOpen(false)} className="mt-4 scale-125">
-                  <UserButton afterSignOutUrl="/" />
+                <div className="flex flex-col items-center gap-6 mt-4">
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setOpen(false)}
+                    className="text-xl font-semibold text-white/80 hover:text-white transition-colors cursor-pointer"
+                  >
+                    Dashboard
+                  </Link>
+                  <div className="scale-125">
+                    <UserButton afterSignOutUrl="/" />
+                  </div>
                 </div>
               </SignedIn>
             </>
