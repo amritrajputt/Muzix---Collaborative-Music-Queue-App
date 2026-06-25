@@ -11,6 +11,26 @@ import songRouter from "./modules/songs/songs.routes.js"
 import voteRouter from "./modules/votes/votes.routes.js"
 
 const app: Express = express()
+
+// ─── CORS Middleware ───────────────────────
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  } else {
+    res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+  }
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  
+  if (req.method === "OPTIONS") {
+    res.sendStatus(200);
+    return;
+  }
+  next();
+});
+
 app.use("/auth/webhook", express.raw({ type: "application/json" }))
 
 // ─── Middleware ──────────────────────────
