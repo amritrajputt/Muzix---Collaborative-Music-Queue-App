@@ -23,9 +23,10 @@ class SongService {
              throw ApiError.badRequest("Queue is full")
            }
 
-           const isAlreadyAdded = await RedisSortedSet.getSongMetadata(spaceId, videoId)
-           if (isAlreadyAdded) {
-             throw ApiError.badRequest("Song is already added")
+           const queueItems = await RedisSortedSet.getFullQueue(spaceId)
+           const isSongInQueue = queueItems.some(item => item.value === videoId)
+           if (isSongInQueue) {
+             throw ApiError.badRequest("Song is already in the queue")
            }
 
            const isUnderLimit = await RedisRateLimitAndVotes.isUnderRateLimit(spaceId, guestUuid, 3)

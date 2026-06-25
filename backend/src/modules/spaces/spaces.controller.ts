@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from "express"
 import ApiError from "../../common/errors/ApiError.js"
 import ApiResponse from "../../common/responses/ApiResponse.js"
 import SpaceService from "./spaces.service.js"
+import NowPlayingService from "../nowPlaying/nowPlaying.service.js"
+import { emitToRoom } from "../redis/redis.pubsub.js"
 
 class SpaceController {
     static async createSpace(req: Request, res: Response, next: NextFunction) {
@@ -81,6 +83,43 @@ class SpaceController {
             const spaces = await SpaceService.getSpacesByUserId(dbUserId)
             const response = ApiResponse.created(201, { spaces }, "Spaces fetched successfully")
             return res.status(response.statusCode).json(response)
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    static async skipSong(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { spaceId } = req.params;
+            const dbUserId = req.dbUser.id;
+
+            const space = await SpaceService.getSpaceById(spaceId);
+            if (space.userId !== dbUserId) {
+                throw ApiError.forbidden("Only the space creator can skip songs");
+            }
+
+            await NowPlayingService.advanceToNextSong(spaceId);
+            const response = ApiResponse.success(200, {}, "Song skipped successfully");
+            return res.status(response.statusCode).json(response);
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    static async controlPlayback(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { spaceId } = req.params;
+            const { isPlaying, currentTime } = req.body;
+            const dbUserId = req.dbUser.id;
+
+            const space = await SpaceService.getSpaceById(spaceId);
+            if (space.userId !== dbUserId) {
+                throw ApiError.forbidden("Only the space creator can control playback");
+            }
+
+            emitToRoom("playback-state-changed", { isPlaying, currentTime }, spaceId);
+            const response = ApiResponse.success(200, { isPlaying, currentTime }, "Playback state changed successfully");
+            return res.status(response.statusCode).json(response);
         } catch (err) {
             next(err);
         }

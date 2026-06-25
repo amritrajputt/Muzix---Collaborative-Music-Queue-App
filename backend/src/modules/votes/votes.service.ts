@@ -11,6 +11,12 @@ interface CreateVoteInput {
 
 export class VoteService {
    static async createVote({ spaceId, songId, guestUuid }: CreateVoteInput) {
+       const queueItems = await RedisSortedSet.getFullQueue(spaceId)
+       const isSongInQueue = queueItems.some(item => item.value === songId)
+       if (!isSongInQueue) {
+           throw ApiError.badRequest("Song is not in the queue")
+       }
+
        const isVoted = await RedisRateLimitAndVotes.hasUserVoted(spaceId, guestUuid, songId)
        if (isVoted) {
            throw ApiError.badRequest("You have already voted for this song")
