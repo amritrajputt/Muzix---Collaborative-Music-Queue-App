@@ -7,7 +7,8 @@ export let io: Server | null = null
 export const initSocketServer = (httpServer: HttpServer): Server => {
   const ioInstance = new Server(httpServer, {
     cors: {
-      origin: ["http://localhost:3001"],
+      origin: ["http://localhost:5173", "http://localhost:3001"],
+      credentials: true
     },
   })
 

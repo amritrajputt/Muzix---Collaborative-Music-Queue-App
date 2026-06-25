@@ -3,15 +3,26 @@ import { JoinSpacePayload, LeaveSpacePayload, ReportDurationPayload } from "./so
 import { emitToRoom } from "../redis/redis.pubsub.js"
 import { NowPlayingService } from "../nowPlaying/nowPlaying.service.js"
 
+import { RedisSortedSet } from "../redis/redis.sortedSet.js"
+
 export const registerSocketEvents = (socket: Socket, io: Server) => {
   console.log("a user connected via socket:", socket.id)
 
-  socket.on("join-space", ({ spaceId, guestName, guestUuid }: JoinSpacePayload) => {
+  socket.on("join-space", async ({ spaceId, guestName, guestUuid }: JoinSpacePayload) => {
     socket.join(spaceId)
     socket.data.spaceId = spaceId
     socket.data.guestName = guestName
     socket.data.guestUuid = guestUuid
     emitToRoom("member-joined", { guestName, guestUuid }, spaceId)
+
+    try {
+      const nowPlaying = await RedisSortedSet.getNowPlaying(spaceId)
+      if (nowPlaying) {
+        socket.emit("nowPlayingChanged", { song: nowPlaying })
+      }
+    } catch (err) {
+      console.error("Error sending nowPlaying info to joining socket:", err)
+    }
   })
 
   socket.on("leave-space", ({ spaceId, guestName, guestUuid }: LeaveSpacePayload) => {
@@ -24,6 +35,17 @@ export const registerSocketEvents = (socket: Socket, io: Server) => {
       await NowPlayingService.onDurationReported(spaceId, songId, duration)
     } catch (error) {
       console.error(`Error handling report-duration:`, error)
+    }
+  })
+
+  socket.on("song-ended", async ({ spaceId, songId }: { spaceId: string, songId: string }) => {
+    try {
+      const nowPlaying = await RedisSortedSet.getNowPlaying(spaceId)
+      if (nowPlaying && nowPlaying.songId === songId) {
+        await NowPlayingService.advanceToNextSong(spaceId)
+      }
+    } catch (error) {
+      console.error(`Error handling song-ended:`, error)
     }
   })
 
