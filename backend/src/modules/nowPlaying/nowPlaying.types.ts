@@ -5,6 +5,8 @@ export interface NowPlayingState {
   thumbnail: string
   startedAt: number
   duration?: number
+  isPlaying?: boolean
+  pausedAt?: number
 }
 
 export interface ReportDurationPayload {

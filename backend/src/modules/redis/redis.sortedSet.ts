@@ -76,8 +76,8 @@ export class RedisSortedSet extends RedisBase {
   }
 
   static async setNowPlaying(
-    spaceId: string, 
-    songInfo: { songId: string, title: string, url: string, thumbnail: string, startedAt: number, duration?: number }
+    spaceId: string,
+    songInfo: { songId: string, title: string, url: string, thumbnail: string, startedAt: number, duration?: number, isPlaying?: boolean, pausedAt?: number }
   ) {
     await this.connect()
     const key = `nowPlaying:${spaceId}`
@@ -91,6 +91,16 @@ export class RedisSortedSet extends RedisBase {
     if (songInfo.duration !== undefined) {
       fields.duration = songInfo.duration.toString()
     }
+    if (songInfo.isPlaying !== undefined) {
+      fields.isPlaying = songInfo.isPlaying.toString()
+    } else {
+      fields.isPlaying = "true"
+    }
+    if (songInfo.pausedAt !== undefined && songInfo.pausedAt !== null) {
+      fields.pausedAt = songInfo.pausedAt.toString()
+    } else {
+      await this.client.hDel(key, "pausedAt")
+    }
     await this.client.hSet(key, fields)
   }
 
@@ -99,7 +109,7 @@ export class RedisSortedSet extends RedisBase {
     const key = `nowPlaying:${spaceId}`
     const data = await this.client.hGetAll(key)
     if (!data || Object.keys(data).length === 0) return null
-    const result: { songId: string, title: string, url: string, thumbnail: string, startedAt: number, duration?: number } = {
+    const result: { songId: string, title: string, url: string, thumbnail: string, startedAt: number, duration?: number, isPlaying?: boolean, pausedAt?: number } = {
       songId: data.songId,
       title: data.title,
       url: data.url,
@@ -108,6 +118,14 @@ export class RedisSortedSet extends RedisBase {
     }
     if (data.duration !== undefined) {
       result.duration = Number(data.duration)
+    }
+    if (data.isPlaying !== undefined) {
+      result.isPlaying = data.isPlaying === "true"
+    } else {
+      result.isPlaying = true
+    }
+    if (data.pausedAt !== undefined) {
+      result.pausedAt = Number(data.pausedAt)
     }
     return result
   }

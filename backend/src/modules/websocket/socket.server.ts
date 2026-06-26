@@ -7,7 +7,14 @@ export let io: Server | null = null
 export const initSocketServer = (httpServer: HttpServer): Server => {
   const ioInstance = new Server(httpServer, {
     cors: {
-      origin: ["http://localhost:5173", "http://localhost:3001"],
+      origin: (origin, callback) => {
+        // Allow all localhost origins during development, otherwise specific origins
+        if (!origin || /^http:\/\/localhost(:\d+)?$/.test(origin)) {
+          callback(null, true);
+        } else {
+          callback(null, ["http://localhost:5173", "http://localhost:3001"]);
+        }
+      },
       credentials: true
     },
   })
