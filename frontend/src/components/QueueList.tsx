@@ -11,12 +11,13 @@ interface Song {
 interface QueueListProps {
   queue: Song[];
   guestUuid: string | null;
+  guestName: string | null;
   upvotingIds: Set<string>;
   votedSongIds: Set<string>;
   onUpvote: (songId: string) => void;
 }
 
-export const QueueList = ({ queue, guestUuid, upvotingIds, votedSongIds, onUpvote }: QueueListProps) => {
+export const QueueList = ({ queue, guestName, guestUuid, upvotingIds, votedSongIds, onUpvote }: QueueListProps) => {
   return (
     <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.06] backdrop-blur-xl">
       <div className="flex items-center justify-between mb-6">
@@ -62,7 +63,9 @@ export const QueueList = ({ queue, guestUuid, upvotingIds, votedSongIds, onUpvot
                 <p className="text-[10px] text-slate-500 mt-1 truncate">
                   Queued by:{' '}
                   <span className="text-slate-400 font-medium">
-                    {song.addedBy === guestUuid ? 'You' : `User_${song.addedBy.substring(0, 4)}`}
+                    {song.addedBy === guestName 
+                      ? 'You' 
+                      : (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(song.addedBy) ? 'Guest' : song.addedBy)}
                   </span>
                 </p>
               </div>
@@ -71,13 +74,12 @@ export const QueueList = ({ queue, guestUuid, upvotingIds, votedSongIds, onUpvot
               <button
                 onClick={() => onUpvote(song.songId)}
                 disabled={upvotingIds.has(song.songId) || votedSongIds.has(song.songId)}
-                className={`px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all border cursor-pointer ${
-                  votedSongIds.has(song.songId)
+                className={`px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all border cursor-pointer ${votedSongIds.has(song.songId)
                     ? 'bg-pink-500/20 text-pink-400 border-pink-500/30'
                     : song.addedBy === guestUuid
                       ? 'bg-purple-500/10 text-purple-400 border-purple-500/25 hover:bg-purple-500/20'
                       : 'bg-white/[0.02] text-slate-400 border-white/[0.06] hover:border-pink-500/30 hover:text-pink-400 hover:bg-pink-500/5'
-                }`}
+                  }`}
               >
                 {upvotingIds.has(song.songId) ? (
                   <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />

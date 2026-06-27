@@ -79,6 +79,7 @@ export function SpacePage({ spaceId }: SpacePageProps) {
   const { isSignedIn } = useAuth();
   const [dbUser, setDbUser] = useState<any>(null);
   const [hostId, setHostId] = useState<string | null>(null);
+  const [creatorName, setCreatorName] = useState<string | null>(null);
 
   // Playback & Progress States
   const [isPlaying, setIsPlaying] = useState(false);
@@ -110,6 +111,11 @@ export function SpacePage({ spaceId }: SpacePageProps) {
 
   const isHost = dbUser && hostId && dbUser.id === hostId;
 
+  const isHostRef = useRef<boolean>(false);
+  useEffect(() => {
+    isHostRef.current = !!isHost;
+  }, [isHost]);
+
   // Sync playback position to server's startedAt
   const syncPlaybackWithServer = (player: any) => {
     if (!nowPlayingRef.current || !nowPlayingRef.current.startedAt) return;
@@ -118,8 +124,8 @@ export function SpacePage({ spaceId }: SpacePageProps) {
       ? (nowPlayingRef.current.pausedAt || 0)
       : (getServerTime() - nowPlayingRef.current.startedAt) / 1000;
     const totalDuration = nowPlayingRef.current.duration || (player.getDuration ? player.getDuration() : 0);
-    
-    if (!isPaused && totalDuration > 0 && elapsedSeconds >= totalDuration) {
+
+    if (isHostRef.current && !isPaused && totalDuration > 0 && elapsedSeconds >= totalDuration) {
       console.log('[YT Player Debug] Elapsed time exceeds duration, emitting song-ended');
       const currentSongId = nowPlayingRef.current?.songId;
       if (socketRef.current && currentSongId) {
@@ -217,7 +223,7 @@ export function SpacePage({ spaceId }: SpacePageProps) {
             } else if (event.data === window.YT.PlayerState.ENDED) {
               setIsPlaying(false);
               const currentSongId = nowPlayingRef.current?.songId;
-              if (socketRef.current && currentSongId) {
+              if (isHostRef.current && socketRef.current && currentSongId) {
                 socketRef.current.emit('song-ended', {
                   spaceId,
                   songId: currentSongId,
@@ -383,6 +389,7 @@ export function SpacePage({ spaceId }: SpacePageProps) {
       if (roomRes && roomRes.success && roomRes.data?.space) {
         setSpaceName(roomRes.data.space.spaceName);
         setHostId(roomRes.data.space.userId);
+        setCreatorName(roomRes.data.space.creatorName || null);
       }
 
       // 2. Fetch songs queue
@@ -459,6 +466,9 @@ export function SpacePage({ spaceId }: SpacePageProps) {
 
       // Optimistically update local player state for responsiveness
       if (nextIsPlaying) {
+        if (!isHost) {
+          playerRef.current.seekTo(expectedServerTime, true);
+        }
         playerRef.current.playVideo();
         setIsPlaying(true);
       } else {
@@ -574,7 +584,9 @@ export function SpacePage({ spaceId }: SpacePageProps) {
 
     queue.forEach((song) => {
       // Seed scores based on items queued and votes received
-      const author = song.addedBy === guestUuid ? (guestName || 'You') : `User_${song.addedBy.substring(0, 4)}`;
+      const author = song.addedBy === guestName || song.addedBy === guestUuid
+        ? (guestName || 'You')
+        : (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(song.addedBy) ? 'Guest' : song.addedBy);
       scoreMap[author] = (scoreMap[author] || 0) + 15 + (song.votes * 10);
     });
 
@@ -663,6 +675,7 @@ export function SpacePage({ spaceId }: SpacePageProps) {
             spaceName={spaceName}
             spaceId={spaceId}
             guestName={guestName}
+            creatorName={creatorName}
             onLeave={() => {
               localStorage.removeItem(`guestName_${spaceId}`);
               localStorage.removeItem(`guestUuid_${spaceId}`);

@@ -1,6 +1,6 @@
 import db from "../../db/index.js"
 import ApiError from "../../common/errors/ApiError.js"
-import {  plans, spaces, spaceMembers } from "../../db/schema.js"
+import {  plans, spaces, spaceMembers, users } from "../../db/schema.js"
 import { eq, and } from "drizzle-orm"
 import bcrypt from "bcrypt";
 import crypto from "crypto";
@@ -59,7 +59,21 @@ class SpaceService {
     }
 
     static async getSpaceById(spaceId: string) {
-        const space = await db.select().from(spaces).where(eq(spaces.id, spaceId)).limit(1);
+        const space = await db.select({
+            id: spaces.id,
+            userId: spaces.userId,
+            spaceName: spaces.spaceName,
+            spacePassword: spaces.spacePassword,
+            isActive: spaces.isActive,
+            maxSongs: spaces.maxSongs,
+            createdAt: spaces.createdAt,
+            creatorName: users.name
+        })
+        .from(spaces)
+        .leftJoin(users, eq(spaces.userId, users.id))
+        .where(eq(spaces.id, spaceId))
+        .limit(1);
+
         if (space.length === 0) {
             throw ApiError.notFound("Space not found");
         }

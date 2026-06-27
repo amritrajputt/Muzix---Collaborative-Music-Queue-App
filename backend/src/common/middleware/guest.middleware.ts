@@ -7,11 +7,13 @@ export const getGuestIdentifier = (
   next: NextFunction
 ) => {
   const guestUuid = req.headers["x-guest-uuid"] as string
+  const guestName = req.headers["x-guest-name"] as string
 
   if (!guestUuid) {
     throw ApiError.badRequest("x-guest-uuid header is required")
   }
 
   req.guestUuid = guestUuid
+  req.guestName = guestName || "Guest"
   next()
 }

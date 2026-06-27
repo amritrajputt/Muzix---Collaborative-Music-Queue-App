@@ -5,10 +5,11 @@ interface RoomInfoSidebarProps {
   spaceName: string;
   spaceId: string;
   guestName: string;
+  creatorName: string | null;
   onLeave: () => void;
 }
 
-export const RoomInfoSidebar = ({ spaceName, spaceId, guestName, onLeave }: RoomInfoSidebarProps) => {
+export const RoomInfoSidebar = ({ spaceName, spaceId, guestName, creatorName, onLeave }: RoomInfoSidebarProps) => {
   const { showToast } = useToast();
 
   const handleCopyId = () => {
@@ -36,11 +37,23 @@ export const RoomInfoSidebar = ({ spaceName, spaceId, guestName, onLeave }: Room
               className="p-1.5 rounded-md hover:bg-white/5 text-slate-400 hover:text-white transition-colors cursor-pointer"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
               </svg>
             </button>
           </div>
         </div>
+
+        {creatorName && (
+          <div>
+            <span className="block text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Host</span>
+            <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+              <div className="w-6.5 h-6.5 rounded-full bg-pink-500/10 flex items-center justify-center border border-pink-500/20 text-xs font-bold text-pink-400">
+                {creatorName.charAt(0).toUpperCase()}
+              </div>
+              <span className="text-sm font-semibold text-slate-300 truncate">{creatorName}</span>
+            </div>
+          </div>
+        )}
 
         <div>
           <span className="block text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Your Identity</span>

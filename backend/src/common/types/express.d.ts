@@ -7,6 +7,7 @@ declare global {
     interface Request {
       dbUser: DbUser
       guestUuid?: string
+      guestName?: string
     }
   }
 }

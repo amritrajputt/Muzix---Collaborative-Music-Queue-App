@@ -35,12 +35,12 @@ class songController {
 
     static async getSpaceSongsController(req: Request, res: Response, next: NextFunction) {
         try {
-            const {spaceId} = req.params
+            const { spaceId } = req.params
             if (!spaceId) {
                 throw ApiError.badRequest("spaceId is required")
             }
             const songs = await songService.getSpaceSongs(spaceId)
-            const response = ApiResponse.success(200, {songs}, "Songs fetched successfully")
+            const response = ApiResponse.success(200, { songs }, "Songs fetched successfully")
             return res.status(response.statusCode).json(response)
         } catch (error) {
             next(error)
