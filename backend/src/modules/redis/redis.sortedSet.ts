@@ -75,6 +75,12 @@ export class RedisSortedSet extends RedisBase {
     return result
   }
 
+  static async deleteSongMetadata(spaceId: string, songId: string) {
+    await this.connect()
+    const key = `song:${spaceId}:${songId}`
+    await this.client.del(key)
+  }
+
   static async setNowPlaying(
     spaceId: string,
     songInfo: { songId: string, title: string, url: string, thumbnail: string, startedAt: number, duration?: number, isPlaying?: boolean, pausedAt?: number }

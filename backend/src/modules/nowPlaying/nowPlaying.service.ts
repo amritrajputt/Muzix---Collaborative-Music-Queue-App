@@ -26,6 +26,7 @@ export class NowPlayingService {
             }
 
             await RedisSortedSet.removeSongFromQueue(spaceId, songId)
+            await RedisSortedSet.deleteSongMetadata(spaceId, songId)
             await RedisRateLimitAndVotes.clearVotes(spaceId, songId)
 
             const nowPlayingInfo: NowPlayingState = {
