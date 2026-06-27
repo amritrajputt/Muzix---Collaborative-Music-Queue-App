@@ -24,7 +24,6 @@ function Header() {
     ['Home', 'home'],
     ['About', 'about'],
     ['How It Works', 'how-it-works'],
-    ['Pricing', 'pricing'],
     ['Contact', 'contact'],
   ]
 

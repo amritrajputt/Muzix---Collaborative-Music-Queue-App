@@ -249,103 +249,6 @@ function LandingPage() {
           </div>
         </div>
 
-        <button onClick={() => scrollTo('pricing')} className="scroll-bounce absolute bottom-6 left-1/2 text-slate-500 hover:text-white transition-colors cursor-pointer flex flex-col items-center gap-1 border-0 bg-transparent">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-      </section>
-
-
-      {/* ══════════════════════════════════════════ */}
-      {/* SECTION 4 – PRICING                        */}
-      {/* ══════════════════════════════════════════ */}
-      <section id="pricing" className="scroll-section relative overflow-hidden bg-[#030014]">
-        <div className="glow-orb glow-orb-1" style={{ top: '-50px', left: '50%', width: '500px', height: '500px' }} />
-
-        <div className="relative z-10 flex flex-col justify-center items-center h-full max-w-7xl mx-auto px-5 sm:px-10 md:px-16 py-16 md:py-20 text-center">
-          <span className="px-3.5 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/5 text-cyan-400 text-[10px] font-bold tracking-[0.15em] uppercase mb-6 sm:mb-8 inline-block">
-            PRICING
-          </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3 sm:mb-4 leading-tight">
-            Plans that scale with your rhythm
-          </h2>
-          <p className="text-slate-400 text-base sm:text-lg font-light mb-10 sm:mb-14 max-w-md">
-            Start for free with friends, or unlock premium room controls.
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-3xl text-left">
-            {/* Free */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-white/[0.015] border border-white/[0.06] flex flex-col hover:border-slate-700/60 transition-all">
-              <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">Free</h3>
-              <p className="text-slate-500 text-sm mb-5 sm:mb-6">Perfect for small hangouts</p>
-              <div className="flex items-baseline gap-1 text-white mb-6 sm:mb-8">
-                <span className="text-4xl sm:text-5xl font-black">₹0</span>
-                <span className="text-slate-500 text-sm">/ month</span>
-              </div>
-              <hr className="border-white/[0.05] mb-5 sm:mb-7" />
-              <ul className="flex-1 space-y-3 text-slate-300 text-sm mb-6 sm:mb-8">
-                {['1 active room at a time', '15 songs per queue', 'Limited concurrent listeners'].map(f => (
-                  <li key={f} className="flex items-center gap-3">
-                    <svg className="w-4 h-4 text-pink-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" /></svg>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <button className="w-full py-3 sm:py-3.5 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl border border-white/10 hover:border-white/20 transition-all cursor-pointer text-sm sm:text-base">
-                    Get Started Free
-                  </button>
-                </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                <button className="w-full py-3 sm:py-3.5 bg-white/5 hover:bg-white/10 text-white font-semibold rounded-xl border border-white/10 hover:border-white/20 transition-all cursor-pointer text-sm sm:text-base">
-                  Get Started Free
-                </button>
-              </SignedIn>
-            </div>
-
-            {/* Pro */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-pink-950/20 border-2 border-pink-500/25 flex flex-col relative shadow-2xl shadow-pink-500/5 hover:border-pink-500/40 transition-all">
-              <span className="absolute -top-3.5 right-5 sm:right-6 px-3 py-1 bg-pink-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-full">
-                POPULAR
-              </span>
-              <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">Pro</h3>
-              <p className="text-slate-500 text-sm mb-5 sm:mb-6">For active communities</p>
-              <div className="flex items-baseline gap-1 text-white mb-6 sm:mb-8">
-                <span className="text-4xl sm:text-5xl font-black">₹399</span>
-                <span className="text-slate-400 text-sm">/ month</span>
-              </div>
-              <hr className="border-white/[0.05] mb-5 sm:mb-7" />
-              <ul className="flex-1 space-y-3 text-slate-300 text-sm mb-6 sm:mb-8">
-                {[
-                  ['Unlimited active rooms', true],
-                  ['Unlimited queue size', true],
-                  ['Unlimited listeners', true]
-                ].map(([f, bold]) => (
-                  <li key={String(f)} className="flex items-center gap-3">
-                    <svg className="w-4 h-4 text-pink-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" /></svg>
-                    <span className={bold ? 'font-medium text-white' : ''}>{String(f)}</span>
-                  </li>
-                ))}
-              </ul>
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <button className="w-full py-3 sm:py-3.5 bg-pink-500 hover:bg-pink-600 text-white font-semibold rounded-xl hover:scale-[1.02] active:scale-95 transition-all cursor-pointer shadow-lg shadow-pink-500/20 text-sm sm:text-base">
-                    Upgrade to Pro
-                  </button>
-                </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                <button className="w-full py-3 sm:py-3.5 bg-pink-500 hover:bg-pink-600 text-white font-semibold rounded-xl hover:scale-[1.02] active:scale-95 transition-all cursor-pointer shadow-lg shadow-pink-500/20 text-sm sm:text-base">
-                  Upgrade to Pro
-                </button>
-              </SignedIn>
-            </div>
-          </div>
-        </div>
-
         <button onClick={() => scrollTo('contact')} className="scroll-bounce absolute bottom-6 left-1/2 text-slate-500 hover:text-white transition-colors cursor-pointer flex flex-col items-center gap-1 border-0 bg-transparent">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -464,7 +367,7 @@ function LandingPage() {
             <div>
               <h4 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-5">Product</h4>
               <ul className="space-y-3">
-                {[['Home', 'home'], ['About', 'about'], ['How It Works', 'how-it-works'], ['Pricing', 'pricing']].map(([label, id]) => (
+                {[['Home', 'home'], ['About', 'about'], ['How It Works', 'how-it-works']].map(([label, id]) => (
                   <li key={id}>
                     <button
                       onClick={() => scrollTo(id)}
