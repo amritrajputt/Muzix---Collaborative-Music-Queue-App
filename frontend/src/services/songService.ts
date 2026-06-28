@@ -1,13 +1,15 @@
 import api from "./api";
 
 class SongService {
-  async addSong(spaceId: string, guestUuid: string, youtubeURL: string) {
+  async addSong(spaceId: string, guestUuid: string, youtubeURL: string, idempotencyKey?: string) {
+    const key = idempotencyKey || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15));
     const response = await api.post(
       '/add',
       { spaceId, youtubeURL },
       {
         headers: {
           'x-guest-uuid': guestUuid,
+          'X-Idempotency-Key': key,
           'Content-Type': 'application/json',
         },
       }

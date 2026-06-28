@@ -164,8 +164,9 @@ export function useSpaceRoom(spaceId: string) {
     if (!youtubeURL.trim() || !guestUuid) return;
 
     setAdding(true);
+    const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
     try {
-      const res = await songService.addSong(spaceId, guestUuid, youtubeURL);
+      const res = await songService.addSong(spaceId, guestUuid, youtubeURL, idempotencyKey);
       if (res && res.success) {
         setYoutubeURL('');
         fetchRoomData();

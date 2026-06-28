@@ -1,11 +1,13 @@
 import api from "./api";
 
 class CreateRoomService {
-    async createRoom(spaceName: string, spacePassword: string) {
+    async createRoom(spaceName: string, spacePassword: string, idempotencyKey?: string) {
         try {
+            const key = idempotencyKey || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15));
             const response = await api.post("/spaces", { spaceName, spacePassword }, {
                 headers: {
                     "Content-Type": "application/json",
+                    "X-Idempotency-Key": key,
                 },
             });
             return response.data;

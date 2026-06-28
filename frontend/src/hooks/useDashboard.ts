@@ -53,8 +53,9 @@ export function useDashboard() {
     e.preventDefault();
     if (!spaceName.trim() || !spacePassword.trim()) return;
 
+    const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
     try {
-      const res = await createRoomService.createRoom(spaceName, spacePassword);
+      const res = await createRoomService.createRoom(spaceName, spacePassword, idempotencyKey);
       if (res && res.success) {
         setIsCreateOpen(false);
         setSpaceName('');
