@@ -1,0 +1,107 @@
+import { useState, useEffect } from 'react';
+import createRoomService from '../services/createRoomService';
+import { useToast } from '../contexts/ToastContext';
+import type { Space } from '../components/dashboard/SpaceCard';
+
+export function useDashboard() {
+  const { showToast } = useToast();
+  const [spaces, setSpaces] = useState<Space[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  // Form states
+  const [spaceName, setSpaceName] = useState('');
+  const [spacePassword, setSpacePassword] = useState('');
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const fetchSpaces = async () => {
+    setLoading(true);
+    try {
+      const res = await createRoomService.getAllRooms();
+      if (res && res.success && res.data && res.data.spaces) {
+        const mapped = res.data.spaces.map((s: any) => ({
+          id: s.id,
+          name: s.spaceName,
+          guestCount: s.guestCount ?? 0,
+          songCount: s.songCount ?? 0,
+          isHost: true,
+        }));
+        setSpaces(mapped);
+      } else {
+        setSpaces([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch spaces:', error);
+      setSpaces([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSpaces();
+  }, []);
+
+  const handleCopy = (id: string) => {
+    navigator.clipboard.writeText(id);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleCreateSpaceSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!spaceName.trim() || !spacePassword.trim()) return;
+
+    try {
+      const res = await createRoomService.createRoom(spaceName, spacePassword);
+      if (res && res.success) {
+        setIsCreateOpen(false);
+        setSpaceName('');
+        setSpacePassword('');
+        showToast('Space created successfully!', 'success');
+        fetchSpaces();
+      } else {
+        showToast(res?.message || 'Failed to create space. Please try again.', 'error');
+      }
+    } catch (error) {
+      console.error('Error creating space:', error);
+      showToast('Failed to create space.', 'error');
+    }
+  };
+
+  const handleDeleteSpaceSubmit = async () => {
+    if (!deleteConfirmId) return;
+
+    try {
+      const res = await createRoomService.deleteRoom(deleteConfirmId);
+      if (res && res.success) {
+        setDeleteConfirmId(null);
+        showToast('Space deleted successfully!', 'success');
+        fetchSpaces();
+      } else {
+        showToast(res?.message || 'Failed to delete space.', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting space:', error);
+      showToast('Failed to delete space.', 'error');
+    }
+  };
+
+  return {
+    spaces,
+    loading,
+    isCreateOpen,
+    setIsCreateOpen,
+    deleteConfirmId,
+    setDeleteConfirmId,
+    spaceName,
+    setSpaceName,
+    spacePassword,
+    setSpacePassword,
+    copiedId,
+    handleCopy,
+    handleCreateSpaceSubmit,
+    handleDeleteSpaceSubmit,
+  };
+}

@@ -20,7 +20,7 @@ if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key. Please add VITE_CLERK_PUBLISHABLE_KEY to your .env file.")
 }
 
-import { AxiosInterceptorProvider } from './components/AxiosInterceptorProvider'
+import { AxiosInterceptorProvider } from './providers/AxiosInterceptorProvider'
 import { ToastProvider } from './contexts/ToastContext'
 
 const rootElement = document.getElementById('root')!
