@@ -234,7 +234,7 @@ export function useYoutubePlayer({
     };
   }, []);
 
-  // Sync player on song changes
+  // Load new video when songId changes
   useEffect(() => {
     console.log('[YT Player Debug] Sync player on song changes effect running', {
       songId: nowPlaying?.songId,
@@ -248,36 +248,47 @@ export function useYoutubePlayer({
           ? (nowPlaying.pausedAt || 0)
           : (nowPlaying.startedAt ? (getServerTime() - nowPlaying.startedAt) / 1000 : 0);
         const startSecs = elapsedSeconds > 0 ? Math.floor(elapsedSeconds) : 0;
-        console.log('[YT Player Debug] Loading video via loadVideoById:', nowPlaying.songId, 'start:', startSecs);
-        playerRef.current.loadVideoById({
-          videoId: nowPlaying.songId,
-          startSeconds: startSecs
-        });
-        if (isPaused) {
-          playerRef.current.pauseVideo();
-        } else {
-          if (hasUserInteracted() && typeof playerRef.current.unMute === 'function') {
-            try {
-              playerRef.current.unMute();
-            } catch (err) {}
+
+        // Get currently loaded video ID if possible to prevent reloading the same video
+        let currentVideoId = "";
+        try {
+          if (typeof playerRef.current.getVideoData === 'function') {
+            currentVideoId = playerRef.current.getVideoData().video_id;
           }
+        } catch (e) {}
 
-          playerRef.current.playVideo();
-
-          if (!hasUserInteracted()) {
-            const p = playerRef.current;
-            setTimeout(() => {
+        if (currentVideoId !== nowPlaying.songId) {
+          console.log('[YT Player Debug] Loading video via loadVideoById:', nowPlaying.songId, 'start:', startSecs);
+          playerRef.current.loadVideoById({
+            videoId: nowPlaying.songId,
+            startSeconds: startSecs
+          });
+          if (isPaused) {
+            playerRef.current.pauseVideo();
+          } else {
+            if (hasUserInteracted() && typeof playerRef.current.unMute === 'function') {
               try {
-                const state = p.getPlayerState ? p.getPlayerState() : -1;
-                if (state !== window.YT.PlayerState.PLAYING && state !== window.YT.PlayerState.BUFFERING) {
-                  console.log('[Autoplay] Unmuted playback blocked on song change. Retrying muted...');
-                  p.mute();
-                  p.playVideo();
+                playerRef.current.unMute();
+              } catch (err) {}
+            }
+
+            playerRef.current.playVideo();
+
+            if (!hasUserInteracted()) {
+              const p = playerRef.current;
+              setTimeout(() => {
+                try {
+                  const state = p.getPlayerState ? p.getPlayerState() : -1;
+                  if (state !== window.YT.PlayerState.PLAYING && state !== window.YT.PlayerState.BUFFERING) {
+                    console.log('[Autoplay] Unmuted playback blocked on song change. Retrying muted...');
+                    p.mute();
+                    p.playVideo();
+                  }
+                } catch (err) {
+                  console.error('[Autoplay Check Error]', err);
                 }
-              } catch (err) {
-                console.error('[Autoplay Check Error]', err);
-              }
-            }, 1000);
+              }, 1000);
+            }
           }
         }
       } else {
@@ -287,7 +298,46 @@ export function useYoutubePlayer({
       console.log('[YT Player Debug] Call initYoutubePlayer from song changes effect');
       initYoutubePlayer();
     }
-  }, [nowPlaying?.songId, nowPlaying?.startedAt, nowPlaying?.isPlaying, nowPlaying?.pausedAt]);
+  }, [nowPlaying?.songId]);
+
+  // Sync play/pause and seek position on state updates
+  useEffect(() => {
+    if (!playerRef.current || !nowPlaying?.songId) return;
+
+    // Verify the correct video is loaded before syncing play/pause state
+    let currentVideoId = "";
+    try {
+      if (typeof playerRef.current.getVideoData === 'function') {
+        currentVideoId = playerRef.current.getVideoData().video_id;
+      }
+    } catch (e) {}
+
+    if (currentVideoId !== nowPlaying.songId) return;
+
+    const isPaused = nowPlaying.isPlaying === false;
+    const elapsedSeconds = isPaused
+      ? (nowPlaying.pausedAt || 0)
+      : (nowPlaying.startedAt ? (getServerTime() - nowPlaying.startedAt) / 1000 : 0);
+
+    try {
+      if (isPaused) {
+        playerRef.current.pauseVideo();
+      } else {
+        if (hasUserInteracted() && typeof playerRef.current.unMute === 'function') {
+          playerRef.current.unMute();
+        }
+        playerRef.current.playVideo();
+      }
+
+      // Sync seeking if drift is significant
+      const currentLoc = playerRef.current.getCurrentTime() || 0;
+      if (Math.abs(currentLoc - elapsedSeconds) > 2.5) {
+        playerRef.current.seekTo(elapsedSeconds, true);
+      }
+    } catch (err) {
+      console.error('[YT Player Debug] Error syncing on metadata change:', err);
+    }
+  }, [nowPlaying?.startedAt, nowPlaying?.isPlaying, nowPlaying?.pausedAt]);
 
   // Autoplay recovery and auto-unmute on user interaction
   useEffect(() => {
