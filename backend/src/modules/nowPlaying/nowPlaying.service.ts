@@ -3,10 +3,10 @@ import { RedisRateLimitAndVotes } from "../redis/redis.rateLimitAndVotes.js"
 import { emitToRoom } from "../redis/redis.pubsub.js"
 import ApiError from "../../common/errors/ApiError.js"
 import { NowPlayingState } from "./nowPlaying.types.js"
+import { scheduleAdvance } from "./nowPlaying.scheduler.js"
 
 export class NowPlayingService {
 
-    // pop queue, save history, update nowPlaying, broadcast update
     static async advanceToNextSong(spaceId: string): Promise<NowPlayingState | null> {
         try {
             const queueItems = await RedisSortedSet.getFullQueue(spaceId)
@@ -57,19 +57,23 @@ export class NowPlayingService {
         }
 
         if (nowPlaying.songId !== songId) {
-            // Ignore stale duration reports for songs that are no longer playing
             return
         }
 
-        const updatedNowPlaying = {
-            ...nowPlaying,
-            duration
-        }
+        const updatedNowPlaying = { ...nowPlaying, duration }
         await RedisSortedSet.setNowPlaying(spaceId, updatedNowPlaying)
-
         emitToRoom("nowPlayingChanged", { song: updatedNowPlaying }, spaceId)
 
-        await this.tryStartPlayback(spaceId)
+        const elapsedMs = Date.now() - nowPlaying.startedAt
+        const remainingMs = Math.max(duration * 1000 - elapsedMs, 0)
+        const remainingSeconds = remainingMs / 1000
+
+        scheduleAdvance(spaceId, songId, remainingSeconds, async (spaceId, songId) => {
+            const current = await RedisSortedSet.getNowPlaying(spaceId)
+            if (current?.songId === songId) {
+                await this.advanceToNextSong(spaceId)
+            }
+        })
     }
 
     // schedule playback if nothing is currently playing

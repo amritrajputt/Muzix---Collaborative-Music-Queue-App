@@ -15,6 +15,13 @@
       "when": 1781954948525,
       "tag": "0001_secret_ma_gnuci",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784746241729,
+      "tag": "0002_bizarre_blade",
+      "breakpoints": true
     }
   ]
 }
