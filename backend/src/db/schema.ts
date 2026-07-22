@@ -62,6 +62,8 @@ export const spaces = pgTable("spaces", {
 
   maxSongs: integer("max_songs").default(30).notNull(),
 
+  expiresAt: timestamp("expires_at").defaultNow().notNull(),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 

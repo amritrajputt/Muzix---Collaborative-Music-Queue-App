@@ -19,10 +19,12 @@ interface JoinSpace {
 class SpaceService {
     static async createSpace({ name, password, userId }: CreateSpace) {
         const hashPassword = await bcrypt.hash(password, 10);
+        const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
         const newSpace = await db.insert(spaces).values({
             spaceName: name,
             spacePassword: hashPassword,
-            userId
+            userId,
+            expiresAt
         }).returning();
         return newSpace[0];
     }
@@ -65,6 +67,7 @@ class SpaceService {
         .leftJoin(users, eq(spaces.userId, users.id))
         .where(eq(spaces.id, spaceId))
         .limit(1);
+
 
         if (space.length === 0) {
             throw ApiError.notFound("Space not found");
